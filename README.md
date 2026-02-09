@@ -12,11 +12,7 @@ size_categories:
 dataset_info:
   splits:
     - name: train
-      num_examples: 52
-    - name: validation
-      num_examples: 6
-    - name: test
-      num_examples: 8
+      num_examples: 66
 ---
 
 # Crypto Education EN Corpus
@@ -25,13 +21,13 @@ A curated English-language corpus of crypto and blockchain educational content, 
 
 ## Stats
 
-- **66 pages** (train: 52, validation: 6, test: 8)
+- **66 pages**
 - **95,286 words**
 - **Sources**: Ethereum.org, Coinbase Learn, Binance Academy, Investopedia
 
 ## Format
 
-JSONL files split into `train.jsonl`, `validation.jsonl`, and `test.jsonl` (80/10/10). Each line is one page:
+Single `train.jsonl` file. Each line is one page:
 
 ```json
 {"url": "https://...", "title": "Page Title", "markdown": "Clean markdown content...", "word_count": 1234, "depth": 0}

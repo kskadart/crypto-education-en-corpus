@@ -1,48 +1,113 @@
 ---
-license: apache-2.0
 language:
   - en
+license: mit
 tags:
   - crypto
+  - cryptocurrency
   - blockchain
   - education
   - rag
+  - retrieval-augmented-generation
 size_categories:
-  - n<1K
-dataset_info:
-  splits:
-    - name: train
-      num_examples: 66
+  - 1K<n<10K
+task_categories:
+  - text-retrieval
+  - question-answering
 ---
 
-# Crypto Education EN Corpus
+# Crypto Education Corpus (EN)
 
-A curated English-language corpus of crypto and blockchain educational content, scraped from public sources and converted to clean Markdown. Designed for use in RAG (Retrieval-Augmented Generation) pipelines.
+A curated educational corpus about cryptocurrency and blockchain technology, designed for building and evaluating RAG (Retrieval-Augmented Generation) systems.
 
-## Stats
+## Dataset Description
 
-- **66 pages**
-- **95,286 words**
-- **Sources**: Ethereum.org, Coinbase Learn, Binance Academy, Investopedia
+- **Total documents:** 3,487
+- **Total words:** ~3.6M
+- **Language:** English
+- **Domain:** Cryptocurrency & blockchain education
 
-## Format
+### Source Distribution
 
-Single `train.jsonl` file. Each line is one page:
+| Source | Documents | Share |
+|--------|----------|-------|
+| iqwiki.com | 2,379 | 68.2% |
+| academy.binance.com | 581 | 16.7% |
+| kraken.com | 183 | 5.2% |
+| coinbase.com | 125 | 3.6% |
+| gemini.com | 94 | 2.7% |
+| ethereum.org | 74 | 2.1% |
+| investopedia.com | 51 | 1.5% |
 
-```json
-{"url": "https://...", "title": "Page Title", "markdown": "Clean markdown content...", "word_count": 1234, "depth": 0}
+### Word Count Statistics
+
+| Metric | Value |
+|--------|-------|
+| Mean | 1,021 |
+| Median | 888 |
+| Min | 100 |
+| Max | 7,259 |
+
+## Schema
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `url` | string | Source URL of the document |
+| `title` | string | Document title |
+| `markdown` | string | Full text content in Markdown format |
+| `word_count` | int | Number of words in the document |
+| `depth` | int | Crawl depth (0 = seed page) |
+| `source` | string | Source domain name |
+| `related_topics` | list[string] | Related topic names extracted from internal wiki links (iqwiki.com docs only; 59% of docs have topics) |
+
+## Data Collection
+
+The corpus was built from multiple sources:
+
+1. **Web scraping** (Round 1 & 2) — Educational pages from [Investopedia](https://www.investopedia.com/cryptocurrency-4427699), [Coinbase Learn](https://www.coinbase.com/learn), [Kraken Learn](https://www.kraken.com/learn), [Ethereum.org](https://ethereum.org/en/developers/docs/), [Gemini Cryptopedia](https://www.gemini.com/cryptopedia), and others, scraped using [Crawl4AI](https://github.com/unclecode/crawl4ai) with BFS deep crawl strategy
+2. **HuggingFace datasets** — Filtered educational splits from [`distilled-ai/web3-oriented-pretraining-data`](https://huggingface.co/datasets/distilled-ai/web3-oriented-pretraining-data) (Binance Academy articles, IQ Wiki encyclopedia)
+
+### Quality Filters Applied
+
+- Minimum 100 words per document
+- Boilerplate detection (cookie/privacy/newsletter heavy pages removed)
+- URL-based deduplication (normalized: lowercase, stripped fragments/query params)
+- English language only
+- Listing/category pages removed (link-heavy pages with <50 words of actual content)
+- Raw bytecode/assembly pages removed
+- Markup cleanup: wiki-style internal links, citation markers, markdown links, and bare URLs stripped from text
+- Related topics metadata extracted from wiki links before cleanup
+
+## Usage
+
+```python
+from datasets import load_dataset
+
+ds = load_dataset("kskada/crypto-education-en-corpus")
+df = ds["train"].to_pandas()
+
+print(f"Documents: {len(df)}")
+print(f"Sources: {df['source'].nunique()}")
 ```
 
-## Fields
+## Related Datasets
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `url` | string | Source page URL |
-| `title` | string | Page title |
-| `markdown` | string | Clean Markdown content |
-| `word_count` | int | Number of words in the page |
-| `depth` | int | Crawl depth (0 = seed page) |
+- **Golden evaluation set:** [`kskada/crypto-education-en-golden-set`](https://huggingface.co/datasets/kskada/crypto-education-en-golden-set) — 497 Q&A pairs for RAG evaluation
 
-## Collection
+## Citation
 
-Scraped using [simple-web-scraper](https://github.com/kskadart/web-scraper) with Crawl4AI. Content was filtered with a pruning threshold of 0.4 and a minimum of 30 words per page.
+If you use this dataset, please reference:
+
+```
+@dataset{konovalov2026crypto_corpus,
+  title={Crypto Education Corpus (EN)},
+  author={Konovalov, Kirill},
+  year={2026},
+  publisher={HuggingFace},
+  url={https://huggingface.co/datasets/kskada/crypto-education-en-corpus}
+}
+```
+
+## License
+
+MIT
